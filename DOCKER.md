@@ -154,7 +154,7 @@ npm run docker:up
 ## 📁 File Structure
 
 ```
-HealthApp/
+CaseWise/
 ├── docker-compose.yml          # Main compose file
 ├── .dockerignore              # Root docker ignore
 ├── docker/                    # Docker development files

@@ -132,7 +132,7 @@ npm run docker:down
 ## 📁 Project Structure
 
 ```
-HealthApp/
+CaseWise/
 ├── backend/                 # TypeScript Node.js/Express API
 │   ├── src/
 │   │   ├── index.ts        # Main server file (TypeScript)
