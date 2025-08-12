@@ -157,14 +157,15 @@ npm run docker:up
 HealthApp/
 ├── docker-compose.yml          # Main compose file
 ├── .dockerignore              # Root docker ignore
+├── docker/                    # Docker development files
+│   ├── backend.Dockerfile.dev # Backend development image
+│   ├── worker.Dockerfile.dev  # Worker development image
+│   └── frontend.Dockerfile.dev # Frontend development image
 ├── backend/
-│   ├── Dockerfile.dev         # Backend development image
 │   └── .dockerignore         # Backend-specific ignores
 ├── worker/
-│   ├── Dockerfile.dev         # Worker development image
 │   └── .dockerignore         # Worker-specific ignores
 └── frontend/
-    ├── Dockerfile.dev         # Frontend development image
     └── .dockerignore         # Frontend-specific ignores
 ```
 

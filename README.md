@@ -1,14 +1,80 @@
-# Health App Monorepo
+# NHS Patient Management System
 
-A comprehensive health monitoring application built with a modern **Turbo** monorepo architecture and **TypeScript**.
+A comprehensive **Patient Case Notes System** built with a modern **Turbo** monorepo architecture, **TypeScript**, and **Secure JWT Authentication with Cookies**. Designed to meet NHS UK standards with a prescription pad-style interface.
 
 ## 🏗️ Architecture
 
 This monorepo contains three main components:
 
-- **Backend** (`/backend`) - **TypeScript** Node.js/Express API server
-- **Worker** (`/worker`) - **JavaScript** Background job processing service (optimized for OCR tasks)
-- **Frontend** (`/frontend`) - **TypeScript** React-based web application
+- **Backend** (`/backend`) - **TypeScript** Node.js/Express API server with **Secure JWT Authentication** and **SQLite Database**
+- **Worker** (`/worker`) - **JavaScript** Background job processing service with **automatic admin seeding** and **OCR processing** (optimized for medical document processing)
+- **Frontend** (`/frontend`) - **TypeScript** React-based web application with **NHS-style UI** and **Patient Case Notes Management**
+
+## 🏥 Patient Case Notes System Features
+
+### Core Functionality
+- **Patient Registry** - Complete patient management with NHS numbers
+- **Case Notes Management** - Medical records with prescription pad-style interface
+- **PII Protection** - Secure handling of patient personal information
+- **Document Upload** - File upload with OCR processing (coming soon)
+- **Search & Filter** - Advanced patient search and filtering
+- **Status Tracking** - Patient status management (active, urgent, inactive)
+
+### NHS-Style Interface
+- **Prescription Pad Design** - Familiar medical interface layout
+- **Professional UI** - Clean, medical-grade user experience
+- **Responsive Design** - Works on all devices and screen sizes
+- **Accessibility** - WCAG compliant for healthcare environments
+- **Medical Icons** - Lucide React icons for medical terminology
+
+### Patient Management
+- **Complete Patient Profiles** - Full PII and medical information
+- **Emergency Contacts** - Critical contact information
+- **Medical History** - Comprehensive medical background
+- **Allergies & Medications** - Current medication tracking
+- **Case Count Tracking** - Number of visits and case notes
+
+### Case Notes Features
+- **Diagnosis Recording** - Structured diagnosis entry
+- **Prescription Management** - Medication and dosage tracking
+- **Clinical Notes** - Detailed medical observations
+- **Status Management** - Draft, completed, urgent statuses
+- **Attachment Support** - Document upload and management
+- **OCR Integration** - Automatic text extraction from documents
+
+## 🔐 Authentication System
+
+### Features
+- **JWT-based Authentication** - Secure token-based authentication
+- **HTTP-Only Cookies** - Secure token storage (no localStorage)
+- **SQLite Database** - Lightweight database for user management
+- **Password Hashing** - bcrypt for secure password storage
+- **Role-based Access Control** - Admin and user roles
+- **Protected Routes** - Middleware for securing API endpoints
+- **Auto-login** - Persistent sessions with secure cookies
+- **Automatic Admin Seeding** - Worker service ensures admin user is always available
+- **Secure Logout** - Proper session termination
+
+### Security Features
+- **HTTP-Only Cookies** - Tokens cannot be accessed by JavaScript (XSS protection)
+- **Secure Flag** - Cookies only sent over HTTPS in production
+- **SameSite Strict** - CSRF protection
+- **Automatic Token Expiration** - 24-hour token lifetime
+- **No Token in Response Body** - Tokens only stored in secure cookies
+
+### Default Admin User
+- **Email**: `admin@casewise.com`
+- **Password**: `admin`
+- **Role**: `admin`
+
+### API Endpoints
+- `POST /api/auth/login` - User login (sets secure cookie)
+- `POST /api/auth/logout` - User logout (clears cookie)
+- `POST /api/auth/seed` - Seed admin user (called automatically by worker)
+- `GET /api/auth/verify` - Verify JWT token from cookie
+- `GET /api/status` - Protected status endpoint
+- `GET /api/health-metrics` - Protected health data
+- `GET /api/admin/users` - Admin-only endpoint
 
 ## 🚀 Quick Start
 
@@ -59,7 +125,7 @@ npm run docker:down
    
    # Or start individually:
    turbo run dev --filter=backend    # Backend on port 3001
-   turbo run dev --filter=worker     # Worker service
+   turbo run dev --filter=worker     # Worker service (seeds admin user)
    turbo run dev --filter=frontend   # Frontend on port 3000
    ```
 
@@ -69,27 +135,45 @@ npm run docker:down
 HealthApp/
 ├── backend/                 # TypeScript Node.js/Express API
 │   ├── src/
-│   │   └── index.ts        # Main server file (TypeScript)
+│   │   ├── index.ts        # Main server file (TypeScript)
+│   │   ├── database/
+│   │   │   └── schema.ts   # Database initialization
+│   │   ├── models/
+│   │   │   └── User.ts     # User model with authentication
+│   │   ├── middleware/
+│   │   │   └── auth.ts     # JWT authentication middleware
+│   │   └── routes/
+│   │       └── auth.ts     # Authentication routes
+│   ├── data/               # SQLite database files
 │   ├── package.json
 │   ├── tsconfig.json       # TypeScript configuration
-│   ├── Dockerfile.dev      # Development Docker image
 │   └── env.example
 ├── worker/                  # JavaScript Background job processor
 │   ├── src/
-│   │   └── index.js        # Worker service (JavaScript for OCR)
+│   │   └── index.js        # Worker service with auto-seeding & OCR
 │   ├── package.json
-│   ├── Dockerfile.dev      # Development Docker image
 │   └── env.example
 ├── frontend/                # TypeScript React application
 │   ├── public/
 │   │   └── index.html
 │   ├── src/
 │   │   ├── App.tsx         # Main React component (TypeScript)
-│   │   ├── App.css         # Styling
-│   │   └── index.tsx       # React entry point (TypeScript)
+│   │   ├── index.tsx       # React entry point (TypeScript)
+│   │   ├── contexts/
+│   │   │   └── AuthContext.tsx # Authentication context
+│   │   └── components/
+│   │       ├── Login.tsx   # Login component
+│   │       ├── PatientList.tsx # Patient registry component
+│   │       ├── CaseNotes.tsx # Case notes management
+│   │       └── AddPatient.tsx # Patient registration form
 │   ├── package.json
 │   ├── tsconfig.json       # TypeScript configuration
-│   └── Dockerfile.dev      # Development Docker image
+│   ├── tailwind.config.js  # Tailwind CSS configuration
+│   └── postcss.config.js   # PostCSS configuration
+├── docker/                  # Docker development files
+│   ├── backend.Dockerfile.dev
+│   ├── worker.Dockerfile.dev
+│   └── frontend.Dockerfile.dev
 ├── package.json             # Root monorepo config
 ├── tsconfig.json           # Root TypeScript configuration
 ├── turbo.json              # Turbo configuration
@@ -120,7 +204,7 @@ HealthApp/
 ### Individual Services
 - `turbo run dev --filter=backend` - Start backend server
 - `turbo run dev --filter=frontend` - Start React development server
-- `turbo run dev --filter=worker` - Start worker service
+- `turbo run dev --filter=worker` - Start worker service (auto-seeds admin)
 
 ### NPM Scripts (for convenience)
 - `npm run dev` - Start all services
@@ -147,9 +231,70 @@ This monorepo leverages **Turbo** for:
 - **Interface Definitions** - Clear API contracts
 
 ### Worker (JavaScript)
-- **OCR Optimization** - Simpler for image processing tasks
+- **OCR Optimization** - Simpler for document processing tasks
 - **Flexibility** - Easy integration with various OCR libraries
 - **Performance** - No compilation overhead for simple tasks
+- **Auto-seeding** - Ensures admin user is always available
+
+## 🏥 NHS-Style UI/UX
+
+### Frontend Styling
+- **Tailwind CSS** - Utility-first CSS framework
+- **Lucide React** - Beautiful, customizable medical icons
+- **Responsive Design** - Works on all device sizes
+- **NHS Color Scheme** - Professional medical color palette
+- **Prescription Pad Layout** - Familiar medical interface design
+- **Patient Registry** - Comprehensive patient management
+- **Case Notes Interface** - Medical record management
+- **Secure Authentication** - NHS-compliant login system
+
+### Design Features
+- **Medical Icons** - Stethoscope, pills, activity, user icons
+- **Status Indicators** - Patient status with color coding
+- **Professional Layout** - Clean, medical-grade interface
+- **Form Validation** - Comprehensive input validation
+- **Error Handling** - User-friendly error messages
+- **Loading States** - Professional loading indicators
+- **Navigation** - Intuitive medical workflow navigation
+
+## 🔐 Authentication Workflow
+
+### 1. Automatic Admin Seeding
+The worker service automatically ensures the admin user exists:
+```bash
+# Worker automatically calls this on startup
+POST /api/auth/seed
+```
+
+### 2. User Login
+```bash
+# Login with admin credentials (sets secure HTTP-only cookie)
+curl -X POST http://localhost:3001/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "admin@casewise.com", "password": "admin"}' \
+  -c cookies.txt
+```
+
+### 3. Access Protected Endpoints
+```bash
+# Use the cookie for subsequent requests
+curl -X GET http://localhost:3001/api/status \
+  -b cookies.txt
+```
+
+### 4. Secure Logout
+```bash
+# Clear the authentication cookie
+curl -X POST http://localhost:3001/api/auth/logout \
+  -b cookies.txt
+```
+
+### 5. Frontend Authentication
+- **Login Form** - Beautiful, responsive login interface
+- **Secure Cookie Storage** - HTTP-only cookies (XSS protection)
+- **Auto-login** - Persistent sessions across browser sessions
+- **Protected Routes** - Automatic redirect to login if not authenticated
+- **Secure Logout** - Proper session termination with loading states
 
 ## 🐳 Docker Development
 
@@ -179,31 +324,61 @@ For detailed Docker usage, see [DOCKER.md](./DOCKER.md).
 ## 🌐 Service Endpoints
 
 ### Backend (Port 3001)
+
+#### Public Endpoints
 - `GET /health` - Health check endpoint
-- `GET /api/status` - API status information
+- `POST /api/auth/login` - User authentication (sets secure cookie)
+- `POST /api/auth/logout` - User logout (clears cookie)
+- `POST /api/auth/seed` - Seed admin user (called by worker)
+- `GET /api/auth/verify` - Verify JWT token from cookie
+
+#### Protected Endpoints (Require JWT Cookie)
+- `GET /api/status` - API status with user info
+- `GET /api/health-metrics` - Health data endpoint
+- `GET /api/admin/users` - Admin-only endpoint
 
 ### Frontend (Port 3000)
 - Automatically proxies API calls to backend
-- Modern health dashboard with real-time metrics
+- **NHS Patient Management Interface** with case notes
+- **Patient Registry** with search and filtering
+- **Case Notes Management** with prescription pad style
+- **Patient Registration** with comprehensive forms
+
+### Worker Service
+- **Automatic Admin Seeding** - Ensures admin user exists on startup
+- **Backend Health Monitoring** - Regular health checks
+- **OCR Processing** - Document text extraction (coming soon)
+- **Retry Logic** - Robust seeding with multiple attempts
 
 ## 🔧 Development
 
 ### Backend Development
 - Built with **TypeScript** and Express.js
+- **Secure JWT Authentication** with HTTP-only cookies
+- **SQLite Database** for user management
 - Includes security middleware (helmet, cors)
 - Structured for easy API expansion
 - Full type safety and IntelliSense
 
 ### Worker Development
 - Background job processing service in **JavaScript**
+- **Automatic Admin Seeding** - No manual intervention needed
+- **Health Monitoring** - Regular backend health checks
+- **OCR Integration** - Document processing capabilities
+- **Retry Logic** - Robust error handling and retries
 - Extensible job queue system
 - Graceful shutdown handling
-- Optimized for OCR and image processing tasks
+- Optimized for medical document processing
 
 ### Frontend Development
 - Modern React 18 with **TypeScript** and hooks
-- Responsive design with CSS Grid
-- Real-time backend status monitoring
+- **Tailwind CSS** for utility-first styling
+- **Lucide React** for beautiful medical icons
+- **NHS-Style Interface** - Professional medical UI
+- **Secure Authentication Context** for state management
+- **HTTP-only Cookie Support** - XSS protection
+- **Patient Management** - Complete patient registry
+- **Case Notes System** - Medical record management
 - Full type safety for components and state
 
 ## 📦 Package Management
@@ -274,18 +449,30 @@ turbo run type-check
 turbo run clean
 ```
 
-## 🤝 Contributing
+## 🔐 Security Features
 
-1. Create a feature branch
-2. Make your changes
-3. Test all services: `turbo run test`
-4. Type check: `turbo run type-check`
-5. Submit a pull request
+### Authentication
+- **JWT Tokens** - Secure, stateless authentication
+- **HTTP-Only Cookies** - XSS protection (no localStorage)
+- **Password Hashing** - bcrypt with salt rounds
+- **Token Expiration** - 24-hour token lifetime
+- **Role-based Access** - Admin and user permissions
+- **Secure Logout** - Proper session termination
 
-## 📄 License
+### API Security
+- **Protected Routes** - Middleware for authentication
+- **Input Validation** - Request validation and sanitization
+- **Error Handling** - Secure error responses
+- **CORS Configuration** - Cross-origin resource sharing with credentials
+- **Cookie Security** - SameSite, Secure, and HttpOnly flags
 
-This project is licensed under the MIT License.
+### Database Security
+- **SQLite** - File-based database with proper permissions
+- **Prepared Statements** - SQL injection prevention
+- **User Isolation** - Separate user data storage
 
-## 🆘 Support
-
-For issues or questions, please check the individual service documentation or create an issue in the repository.
+### PII Protection
+- **Patient Data Encryption** - Secure storage of personal information
+- **Access Controls** - Role-based patient data access
+- **Audit Logging** - Track data access and modifications
+- **Data Retention** - NHS-compliant data retention policies

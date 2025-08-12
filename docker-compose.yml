@@ -5,7 +5,7 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile.dev
+      dockerfile: ../docker/backend.Dockerfile.dev
     ports:
       - "3001:3001"
     environment:
@@ -14,8 +14,6 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
-    depends_on:
-      - worker
     networks:
       - health-app-network
     restart: unless-stopped
@@ -24,12 +22,18 @@ services:
   worker:
     build:
       context: ./worker
-      dockerfile: Dockerfile.dev
+      dockerfile: ../docker/worker.Dockerfile.dev
     environment:
       - NODE_ENV=development
+      - BACKEND_URL=http://backend:3001
+      - WORKER_INTERVAL=30000
+      - SEED_RETRY_ATTEMPTS=5
+      - SEED_RETRY_DELAY=2000
     volumes:
       - ./worker:/app
       - /app/node_modules
+    depends_on:
+      - backend
     networks:
       - health-app-network
     restart: unless-stopped
@@ -38,7 +42,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
+      dockerfile: ../docker/frontend.Dockerfile.dev
     ports:
       - "3000:3000"
     environment:
