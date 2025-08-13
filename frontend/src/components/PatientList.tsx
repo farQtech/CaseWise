@@ -6,8 +6,6 @@ import {
   Plus, 
   Search, 
   Filter,
-  Eye,
-  Edit,
   Clock,
   AlertCircle
 } from 'lucide-react';

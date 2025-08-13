@@ -5,8 +5,6 @@ import {
   Clock, 
   User, 
   Plus, 
-  Edit, 
-  Eye, 
   Upload, 
   Save,
   X,
@@ -330,16 +328,7 @@ const CaseNotes: React.FC<CaseNotesProps> = ({ patient, onBack }) => {
               </div>
             )}
             
-            <div className="flex justify-end space-x-2">
-              <button className="btn-secondary flex items-center space-x-2">
-                <Eye className="w-4 h-4" />
-                <span>View</span>
-              </button>
-              <button className="btn-secondary flex items-center space-x-2">
-                <Edit className="w-4 h-4" />
-                <span>Edit</span>
-              </button>
-            </div>
+
           </div>
         ))}
       </div>
