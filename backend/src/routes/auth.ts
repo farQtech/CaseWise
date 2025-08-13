@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { UserModel } from '../models/User';
-import { generateToken } from '../middleware/auth';
+import { generateToken, verifyToken } from '../middleware/auth';
 
 export const createAuthRoutes = (userModel: UserModel): Router => {
   const router = Router();
@@ -113,19 +113,21 @@ export const createAuthRoutes = (userModel: UserModel): Router => {
     try {
       // Check for token in cookies
       const token = req.cookies?.token;
-      
+
       if (!token) {
-        return res.status(401).json({
-          error: 'No token provided'
-        });
+        return res.status(401).json({ error: 'No token provided' });
       }
 
-      const user = await userModel.findById(token);
+      // Verify JWT and extract user id
+      const decoded: any = verifyToken(token);
+      if (!decoded || !decoded.id) {
+        return res.status(401).json({ error: 'Invalid token' });
+      }
 
+      // Load user from DB
+      const user = await userModel.findById(decoded.id);
       if (!user) {
-        return res.status(401).json({
-          error: 'Invalid token'
-        });
+        return res.status(401).json({ error: 'User not found' });
       }
 
       res.json({
