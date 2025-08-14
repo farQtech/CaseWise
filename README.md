@@ -77,6 +77,17 @@ This monorepo contains three main components:
 -   `GET /api/health-metrics`
     
 -   `GET /api/admin/users`
+
+## Login
+
+### get auth cookie
+
+```bash
+curl "http://localhost:3000/api/auth/login" -H "Content-Type: application/json" --data-raw '{"email":"admin@casewise.com","password":"admin"}'
+
+  ```
+
+  Note that this will add a cookie to your postman/client that you need to use for other requests
     
 
 ## 🌐 Case Notes API (Backend)
@@ -85,7 +96,7 @@ This monorepo contains three main components:
 
 ```bash
 curl -X GET http://localhost:3001/api/notes/patient/<PATIENT_ID> \
-  -b cookies.txt
+  -b <cookie>
 
 ```
 
@@ -93,7 +104,7 @@ curl -X GET http://localhost:3001/api/notes/patient/<PATIENT_ID> \
 
 ```bash
 curl -X GET http://localhost:3001/api/notes/<CASE_NOTE_ID> \
-  -b cookies.txt
+  -b <cookie>
 
 ```
 
