@@ -35,6 +35,10 @@ export const verifyToken = (token: string): any => {
 export const authMiddleware = (userModel: UserModel) => {
   return async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
+      // for worker
+       const apiKey = req.headers['x-api-key'];
+    if (apiKey === process.env.WORKER_API_KEY) return next();
+
       // Check for token in Authorization header first, then cookies
       let token: string | undefined;
       
