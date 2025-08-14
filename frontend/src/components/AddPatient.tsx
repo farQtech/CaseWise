@@ -104,7 +104,7 @@ const AddPatient: React.FC<AddPatientProps> = ({ onSave, onCancel }) => {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Add New Patient</h2>
-          <p className="text-gray-600">NHS Patient Registration Form</p>
+          <p className="text-gray-600">Patient Registration Form</p>
         </div>
         <button
           onClick={onCancel}

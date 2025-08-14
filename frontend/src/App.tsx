@@ -60,7 +60,7 @@ const Navigation: React.FC = () => {
                 <Activity className="w-8 h-8 text-primary-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">NHS Patient Management</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Patient Management</h1>
                 <p className="text-sm text-gray-500">Secure Case Notes System</p>
               </div>
             </div>
@@ -243,7 +243,7 @@ const PatientListPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-500">
-              © 2024 NHS Patient Management System. Built with React, TypeScript, and Node.js
+              © 2025 Patient Management System. Built with React, TypeScript, and Node.js
             </p>
             <div className="flex items-center space-x-4 text-sm text-gray-500">
               <span>Secure • Compliant • NHS Standards</span>
@@ -338,7 +338,7 @@ const CaseNotesPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-500">
-              © 2024 NHS Patient Management System. Built with React, TypeScript, and Node.js
+              © 2025 Patient Management System. Built with React, TypeScript, and Node.js
             </p>
             <div className="flex items-center space-x-4 text-sm text-gray-500">
               <span>Secure • Compliant • NHS Standards</span>
@@ -429,7 +429,7 @@ const AddPatientPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-500">
-              © 2024 NHS Patient Management System. Built with React, TypeScript, and Node.js
+              © 2025 Patient Management System. Built with React, TypeScript, and Node.js
             </p>
             <div className="flex items-center space-x-4 text-sm text-gray-500">
               <span>Secure • Compliant • NHS Standards</span>
@@ -451,7 +451,7 @@ const AppContent: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading NHS Patient Management System...</p>
+          <p className="text-gray-600">Loading CaseWise Patient Management System...</p>
         </div>
       </div>
     );

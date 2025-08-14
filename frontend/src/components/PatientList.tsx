@@ -109,7 +109,7 @@ const PatientList: React.FC<PatientListProps> = ({ onSelectPatient, onAddNewPati
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Patient Registry</h2>
-          <p className="text-gray-600">NHS Patient Management System</p>
+          <p className="text-gray-600">Patient Management System</p>
         </div>
         <button
           onClick={onAddNewPatient}
