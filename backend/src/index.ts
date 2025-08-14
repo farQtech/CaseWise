@@ -10,6 +10,8 @@ import { FileModel } from './models/File';
 import { createAuthRoutes } from './routes/auth';
 import { createFileRoutes } from './routes/files';
 import { authMiddleware, requireRole, AuthenticatedRequest } from './middleware/auth';
+import { NoteModel } from './models/Note';
+import { createNotesRoutes } from './routes/notes';
 
 dotenv.config();
 
@@ -25,12 +27,14 @@ const PORT = process.env.PORT || 3001;
 // Initialize database and models
 let userModel: UserModel | null = null;
 let fileModel: FileModel | null = null;
+let noteModel: NoteModel | null = null;
 
 const initializeApp = async () => {
   try {
     const db = await initDatabase();
     userModel = new UserModel(db);
     fileModel = new FileModel(db);
+    noteModel = new NoteModel(db);
     
     // Note: Admin user seeding is now handled by the worker service
     console.log('✅ Database and models initialized');
@@ -73,7 +77,7 @@ app.use('/api/auth', (req, res, next) => {
   authRouter(req, res, next);
 });
 
-// File routes (with API key auth for worker endpoints)
+// File routes
 app.use('/api/files', (req, res, next) => {
   if (!fileModel || !userModel) {
     return res.status(503).json({ error: 'Service not ready' });
@@ -83,6 +87,18 @@ app.use('/api/files', (req, res, next) => {
   const fileRouter = createFileRoutes(fileModel, userModel);
   fileRouter(req, res, next);
 });
+
+// Note routes
+app.use('/api/notes', (req, res, next) => {
+  if (!noteModel || !userModel) {
+    return res.status(503).json({ error: 'Service not ready' });
+  }
+  
+  
+  const fileRouter = createNotesRoutes(noteModel, userModel);
+  fileRouter(req, res, next);
+});
+
 
 // Protected API routes (everything else under /api)
 app.use('/api', (req, res, next) => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   FileText, 
   Calendar, 
@@ -14,6 +14,8 @@ import {
   Activity
 } from 'lucide-react';
 import FileUpload from './FileUpload';
+import axios from 'axios';
+import { useParams } from 'react-router-dom';
 
 interface CaseNote {
   id: string;
@@ -44,30 +46,7 @@ interface CaseNotesProps {
 }
 
 const CaseNotes: React.FC<CaseNotesProps> = ({ patient, onBack }) => {
-  const [caseNotes, setCaseNotes] = useState<CaseNote[]>([
-    {
-      id: '1',
-      date: '2024-01-15',
-      time: '14:30',
-      doctor: 'Dr. Sarah Wilson',
-      diagnosis: 'Hypertension',
-      prescription: 'Amlodipine 5mg once daily',
-      notes: 'Patient presents with elevated blood pressure. Recommended lifestyle changes including reduced salt intake and regular exercise.',
-      attachments: ['blood_pressure_chart.pdf'],
-      status: 'completed'
-    },
-    {
-      id: '2',
-      date: '2024-01-10',
-      time: '09:15',
-      doctor: 'Dr. Michael Brown',
-      diagnosis: 'Type 2 Diabetes',
-      prescription: 'Metformin 500mg twice daily',
-      notes: 'Initial diagnosis of Type 2 Diabetes. Blood glucose monitoring required. Referral to diabetes nurse specialist.',
-      attachments: ['blood_work_results.pdf', 'diabetes_guidelines.pdf'],
-      status: 'completed'
-    }
-  ]);
+  const [caseNotes, setCaseNotes] = useState<CaseNote[]>([]);
   const [showNewCase, setShowNewCase] = useState(false);
   const [selectedCase, setSelectedCase] = useState<CaseNote | null>(null);
   const [newCase, setNewCase] = useState({
@@ -78,24 +57,63 @@ const CaseNotes: React.FC<CaseNotesProps> = ({ patient, onBack }) => {
   });
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { patientId } = useParams<{ patientId: string }>();
 
-  const handleAddCase = () => {
-    const caseNote: CaseNote = {
-      id: Date.now().toString(),
-      date: new Date().toISOString().split('T')[0],
-      time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-      doctor: 'Dr. Current User',
-      diagnosis: newCase.diagnosis,
-      prescription: newCase.prescription,
-      notes: newCase.notes,
-      attachments: [],
-      status: newCase.status
+  useEffect(() => {
+    const fetchCaseNotes = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get<{ caseNotes: CaseNote[] }>(`/api/notes/patient/${patientId}`);
+        setCaseNotes(response.data.caseNotes);
+        setError(null);
+      } catch (err: any) {
+        console.error('Failed to fetch case notes:', err);
+        setError(err.response?.data?.error || 'Failed to fetch case notes');
+      } finally {
+        setLoading(false);
+      }
     };
-    
-    setCaseNotes([caseNote, ...caseNotes]);
+
+    fetchCaseNotes();
+  }, [patientId]);
+
+  if (loading) return <p>Loading case notes...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
+
+  const handleAddCase = async () => {
+  if (!patientId) return; // Make sure you have the patientId from route or props
+
+  const caseNotePayload = {
+    date: new Date().toISOString().split('T')[0],
+    time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+    diagnosis: newCase.diagnosis,
+    prescription: newCase.prescription,
+    notes: newCase.notes,
+    attachments: [], // update if files are uploaded
+    status: newCase.status
+  };
+
+  try {
+    const response = await axios.post<{ caseNote: CaseNote }>(
+      `/api/notes/patient/${patientId}`,
+      caseNotePayload
+    );
+
+    const savedCaseNote = response.data.caseNote;
+
+    // Update local state
+    setCaseNotes([savedCaseNote, ...caseNotes]);
     setNewCase({ diagnosis: '', prescription: '', notes: '', status: 'draft' });
     setShowNewCase(false);
-  };
+
+  } catch (error: any) {
+    console.error('Failed to save case note:', error);
+    // Optionally show error to user
+  }
+};
+
 
   const handleFileUpload = () => {
     setShowFileUpload(!showFileUpload);
