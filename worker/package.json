@@ -14,8 +14,11 @@
     "type-check": "echo 'Worker type check passed (JS)'"
   },
   "dependencies": {
-    "axios": "^1.6.2",
-    "dotenv": "^16.3.1"
+    "axios": "^1.11.0",
+    "canvas": "^2.11.2",
+    "dotenv": "^16.3.1",
+    "pdf-lib": "^1.17.1",
+    "tesseract.js": "^6.0.1"
   },
   "devDependencies": {
     "eslint": "^8.55.0",

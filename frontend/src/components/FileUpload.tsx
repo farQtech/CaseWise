@@ -111,6 +111,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ patientId, onUploadComplete }) 
   return (
     <div className="space-y-4">
       {/* File Upload Area */}
+        {uploadedFiles.length == 0 && (
       <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary-400 transition-colors">
         <input
           ref={fileInputRef}
@@ -120,7 +121,6 @@ const FileUpload: React.FC<FileUploadProps> = ({ patientId, onUploadComplete }) 
           onChange={handleFileSelect}
           className="hidden"
         />
-        
         <button
           onClick={() => fileInputRef.current?.click()}
           className="flex flex-col items-center space-y-2 text-gray-600 hover:text-primary-600 transition-colors"
@@ -132,6 +132,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ patientId, onUploadComplete }) 
           </div>
         </button>
       </div>
+        )}
 
       {/* Error Message */}
       {error && (

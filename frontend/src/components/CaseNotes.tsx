@@ -77,6 +77,7 @@ const CaseNotes: React.FC<CaseNotesProps> = ({ patient, onBack }) => {
     status: 'draft' as const
   });
   const [showFileUpload, setShowFileUpload] = useState(false);
+  const [uploadComplete, setUploadComplete] = useState(false);
 
   const handleAddCase = () => {
     const caseNote: CaseNote = {
@@ -99,6 +100,18 @@ const CaseNotes: React.FC<CaseNotesProps> = ({ patient, onBack }) => {
   const handleFileUpload = () => {
     setShowFileUpload(!showFileUpload);
   };
+
+  const handleUploadComplete = () => {
+    setUploadComplete(true);
+  }
+
+  const resetForm = () => {
+    setNewCase({ diagnosis: '', prescription: '', notes: '', status: 'draft' });
+  setShowNewCase(false);
+  setShowFileUpload(false);
+  setUploadComplete(false);
+  setSelectedCase(null);
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -163,6 +176,7 @@ const CaseNotes: React.FC<CaseNotesProps> = ({ patient, onBack }) => {
       {/* New Case Note Form */}
       {showNewCase && (
         <div className="bg-white rounded-lg shadow-lg p-6 border-2 border-primary-200">
+          {!showFileUpload && (<div>
           <div className="flex justify-between items-center mb-4">
             <h4 className="text-lg font-semibold text-gray-900">New Case Note</h4>
             <button
@@ -227,7 +241,8 @@ const CaseNotes: React.FC<CaseNotesProps> = ({ patient, onBack }) => {
               placeholder="Enter clinical notes..."
             />
           </div>
-          
+          </div> )}
+          {!uploadComplete ? (
           <div className="flex justify-between items-center">
             <button
               onClick={handleFileUpload}
@@ -251,19 +266,29 @@ const CaseNotes: React.FC<CaseNotesProps> = ({ patient, onBack }) => {
                 <span>Save Case Note</span>
               </button>
             </div>
-          </div>
+          </div>) : <span className="flex items-center space-x-1 px-3 py-1 border bg-green-100 text-green-800 border-green-200">File is marked for processing, you will see data once it is processed!</span>}
           
           {/* File Upload Section */}
           {showFileUpload && (
+            <div>
+              {!uploadComplete && (
             <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
               <h5 className="font-semibold text-gray-700 mb-3">Upload Patient Documents</h5>
               <FileUpload 
                 patientId={patient.id} 
-                onUploadComplete={() => {
-                  console.log('Files uploaded successfully');
-                }}
+                onUploadComplete={handleUploadComplete}
               />
             </div>
+            )}
+            {uploadComplete&& (
+            <button
+                onClick={resetForm}
+                className="btn-secondary mt-10 mx-auto block w-48"
+              >
+                Exit
+              </button>
+              )}
+              </div>
           )}
         </div>
       )}

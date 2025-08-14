@@ -1,4 +1,4 @@
-# NHS Patient Management System
+# CaseWise Patient Management System
 
 A comprehensive **Patient Case Notes System** built with a modern **Turbo** monorepo architecture, **TypeScript**, and **Secure JWT Authentication with Cookies**. Designed to meet NHS UK standards with a prescription pad-style interface.
 
@@ -339,7 +339,7 @@ For detailed Docker usage, see [DOCKER.md](./DOCKER.md).
 
 ### Frontend (Port 3000)
 - Automatically proxies API calls to backend
-- **NHS Patient Management Interface** with case notes
+- **Patient Management Interface** with case notes
 - **Patient Registry** with search and filtering
 - **Case Notes Management** with prescription pad style
 - **Patient Registration** with comprehensive forms
