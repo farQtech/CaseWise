@@ -13,6 +13,7 @@ import {
   Pill,
   Activity
 } from 'lucide-react';
+import FileUpload from './FileUpload';
 
 interface CaseNote {
   id: string;
@@ -75,6 +76,7 @@ const CaseNotes: React.FC<CaseNotesProps> = ({ patient, onBack }) => {
     notes: '',
     status: 'draft' as const
   });
+  const [showFileUpload, setShowFileUpload] = useState(false);
 
   const handleAddCase = () => {
     const caseNote: CaseNote = {
@@ -95,8 +97,7 @@ const CaseNotes: React.FC<CaseNotesProps> = ({ patient, onBack }) => {
   };
 
   const handleFileUpload = () => {
-    // TODO: Implement OCR processing
-    alert('OCR processing feature coming soon! This will extract text from uploaded documents.');
+    setShowFileUpload(!showFileUpload);
   };
 
   const getStatusColor = (status: string) => {
@@ -233,7 +234,7 @@ const CaseNotes: React.FC<CaseNotesProps> = ({ patient, onBack }) => {
               className="btn-secondary flex items-center space-x-2"
             >
               <Upload className="w-4 h-4" />
-              <span>Upload Document (OCR)</span>
+              <span>{showFileUpload ? 'Hide File Upload' : 'Upload Document (OCR)'}</span>
             </button>
             <div className="flex space-x-2">
               <button
@@ -251,6 +252,19 @@ const CaseNotes: React.FC<CaseNotesProps> = ({ patient, onBack }) => {
               </button>
             </div>
           </div>
+          
+          {/* File Upload Section */}
+          {showFileUpload && (
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
+              <h5 className="font-semibold text-gray-700 mb-3">Upload Patient Documents</h5>
+              <FileUpload 
+                patientId={patient.id} 
+                onUploadComplete={() => {
+                  console.log('Files uploaded successfully');
+                }}
+              />
+            </div>
+          )}
         </div>
       )}
 
@@ -332,6 +346,8 @@ const CaseNotes: React.FC<CaseNotesProps> = ({ patient, onBack }) => {
           </div>
         ))}
       </div>
+
+
 
       {caseNotes.length === 0 && (
         <div className="text-center py-8 bg-white rounded-lg shadow-lg">

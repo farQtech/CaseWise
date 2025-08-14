@@ -6,24 +6,34 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { initDatabase } from './database/schema';
 import { UserModel } from './models/User';
+import { FileModel } from './models/File';
 import { createAuthRoutes } from './routes/auth';
+import { createFileRoutes } from './routes/files';
 import { authMiddleware, requireRole, AuthenticatedRequest } from './middleware/auth';
 
 dotenv.config();
 
+// Debug environment variables
+console.log('🔧 Backend environment variables:');
+console.log('  - NODE_ENV:', process.env.NODE_ENV);
+console.log('  - PORT:', process.env.PORT);
+console.log('  - WORKER_API_KEY:', process.env.WORKER_API_KEY);
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Initialize database and user model
+// Initialize database and models
 let userModel: UserModel | null = null;
+let fileModel: FileModel | null = null;
 
 const initializeApp = async () => {
   try {
     const db = await initDatabase();
     userModel = new UserModel(db);
+    fileModel = new FileModel(db);
     
     // Note: Admin user seeding is now handled by the worker service
-    console.log('✅ Database and user model initialized');
+    console.log('✅ Database and models initialized');
     console.log('🌱 Admin user seeding handled by worker service');
   } catch (error) {
     console.error('❌ Failed to initialize database:', error);
@@ -63,7 +73,18 @@ app.use('/api/auth', (req, res, next) => {
   authRouter(req, res, next);
 });
 
-// Protected API routes
+// File routes (with API key auth for worker endpoints)
+app.use('/api/files', (req, res, next) => {
+  if (!fileModel || !userModel) {
+    return res.status(503).json({ error: 'Service not ready' });
+  }
+  
+  
+  const fileRouter = createFileRoutes(fileModel, userModel);
+  fileRouter(req, res, next);
+});
+
+// Protected API routes (everything else under /api)
 app.use('/api', (req, res, next) => {
   if (!userModel) {
     return res.status(503).json({ error: 'Service not ready' });

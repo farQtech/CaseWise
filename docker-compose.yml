@@ -11,9 +11,11 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3001
+      - WORKER_API_KEY=worker-secret-key
     volumes:
       - ./backend:/app
       - /app/node_modules
+      - ./APP_DATA:/app/APP_DATA
     networks:
       - health-app-network
     restart: unless-stopped
@@ -29,9 +31,11 @@ services:
       - WORKER_INTERVAL=30000
       - SEED_RETRY_ATTEMPTS=5
       - SEED_RETRY_DELAY=2000
+      - WORKER_API_KEY=worker-secret-key
     volumes:
       - ./worker:/app
       - /app/node_modules
+      - ./APP_DATA:/app/APP_DATA
     depends_on:
       - backend
     networks:
