@@ -64,6 +64,10 @@ This monorepo contains three main components:
 
 ### API Endpoints
 
+Hosted app:
+`UI: https://casewise-app.onrender.com/`
+`API: https://casewise.onrender.com/`
+
 -   `POST /api/auth/login`
     
 -   `POST /api/auth/logout`
@@ -83,7 +87,7 @@ This monorepo contains three main components:
 ### get auth cookie
 
 ```bash
-curl "http://localhost:3000/api/auth/login" -H "Content-Type: application/json" --data-raw '{"email":"admin@casewise.com","password":"admin"}'
+curl "https://casewise.onrender.com/api/auth/login" -H "Content-Type: application/json" --data-raw '{"email":"admin@casewise.com","password":"admin"}'
 
   ```
 
@@ -95,7 +99,7 @@ curl "http://localhost:3000/api/auth/login" -H "Content-Type: application/json" 
 ### Get all case notes for a patient
 
 ```bash
-curl -X GET http://localhost:3001/api/notes/patient/<PATIENT_ID> \
+curl -X GET https://casewise-app.onrender.com/api/notes/patient/<PATIENT_ID> \
   -b <cookie>
 
 ```
@@ -103,7 +107,7 @@ curl -X GET http://localhost:3001/api/notes/patient/<PATIENT_ID> \
 ### Get a single case note by ID
 
 ```bash
-curl -X GET http://localhost:3001/api/notes/<CASE_NOTE_ID> \
+curl -X GET https://casewise-app.onrender.com/api/notes/<CASE_NOTE_ID> \
   -b <cookie>
 
 ```
@@ -111,7 +115,7 @@ curl -X GET http://localhost:3001/api/notes/<CASE_NOTE_ID> \
 ### Create a new case note
 
 ```bash
-curl -X POST http://localhost:3001/api/notes/patient/<PATIENT_ID> \
+curl -X POST https://casewise-app.onrender.com/api/notes/patient/<PATIENT_ID> \
   -H "Content-Type: application/json" \
   -d '{
         "date": "2025-08-14",
@@ -156,11 +160,11 @@ npm run docker:down    # Stop services
 
 **Access services:**
 
--   Frontend: [http://localhost:3000](http://localhost:3000/)
+-   Frontend: [https://casewise-app.onrender.com](https://casewise-app.onrender.com/)
     
--   Backend API: [http://localhost:3001](http://localhost:3001/)
+-   Backend API: [https://casewise.onrender.com](https://casewise.onrender.com)
     
--   Health Check: [http://localhost:3001/health](http://localhost:3001/health)
+-   Health Check: [https://casewise.onrender.com/health](https://casewise.onrender.com/health)
     
 
 ### Option 2: Local Development
