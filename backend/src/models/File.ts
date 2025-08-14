@@ -64,7 +64,7 @@ export class FileModel {
     return new Promise((resolve, reject) => {
       this.db.get(FILE_TABLE.SELECT_BY_ID, [id], (err, row) => {
         if (err) reject(err);
-        else resolve(row || null);
+        else resolve(row as FileRecord || null);
       });
     });
   }
@@ -73,7 +73,7 @@ export class FileModel {
     return new Promise((resolve, reject) => {
       this.db.all(FILE_TABLE.SELECT_BY_PATIENT, [patientId], (err, rows) => {
         if (err) reject(err);
-        else resolve(rows || []);
+        else resolve(rows as FileRecord[] || []);
       });
     });
   }
@@ -82,7 +82,7 @@ export class FileModel {
     return new Promise((resolve, reject) => {
       this.db.all(FILE_TABLE.SELECT_BY_STATUS, [status], (err, rows) => {
         if (err) reject(err);
-        else resolve(rows || []);
+        else resolve(rows as FileRecord[] || []);
       });
     });
   }

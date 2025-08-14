@@ -68,7 +68,7 @@ export class NoteModel {
 
   async findById(id: string): Promise<CaseNote | null> {
     return new Promise((resolve, reject) => {
-      this.db.get(NOTE_TABLE.SELECT_BY_ID, [id], (err, row) => {
+      this.db.get(NOTE_TABLE.SELECT_BY_ID, [id], (err, row: CaseNote) => {
         if (err) return reject(err);
         if (!row) return resolve(null);
 
@@ -82,7 +82,7 @@ export class NoteModel {
 
   async findByPatientId(patientId: string): Promise<CaseNote[]> {
     return new Promise((resolve, reject) => {
-      this.db.all(NOTE_TABLE.SELECT_BY_PATIENT, [patientId], (err, rows) => {
+      this.db.all(NOTE_TABLE.SELECT_BY_PATIENT, [patientId], (err, rows: CaseNote[]) => {
         if (err) return reject(err);
         const notes = rows.map(row => ({
           ...row,

@@ -1,5 +1,5 @@
 {
-  "name": "health-app-backend",
+  "name": "case-wise-backend",
   "version": "1.0.0",
   "description": "Health App Backend API",
   "main": "dist/index.js",

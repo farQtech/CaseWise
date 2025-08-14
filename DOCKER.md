@@ -109,7 +109,7 @@ Worker → Backend → Frontend
 - Changes reflect immediately without rebuilding
 
 ### Networking
-- All services communicate via `health-app-network`
+- All services communicate via `case-wise-network`
 - Services can reference each other by service name
 - Ports are exposed to host for development access
 

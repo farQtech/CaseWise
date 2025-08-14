@@ -17,7 +17,7 @@ services:
       - /app/node_modules
       - ./APP_DATA:/app/APP_DATA
     networks:
-      - health-app-network
+      - case-wise-network
     restart: unless-stopped
 
   # Background Worker Service
@@ -39,7 +39,7 @@ services:
     depends_on:
       - backend
     networks:
-      - health-app-network
+      - case-wise-network
     restart: unless-stopped
 
   # Frontend React App
@@ -58,11 +58,11 @@ services:
     depends_on:
       - backend
     networks:
-      - health-app-network
+      - case-wise-network
     restart: unless-stopped
 
 networks:
-  health-app-network:
+  case-wise-network:
     driver: bridge
 
 volumes:

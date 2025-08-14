@@ -1,5 +1,5 @@
 {
-  "name": "health-app-worker",
+  "name": "case-wise-worker",
   "version": "1.0.0",
   "description": "Health App Background Worker Service",
   "main": "src/index.js",

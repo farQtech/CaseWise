@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken';
 import { UserModel } from '../models/User';
 import { AUTH } from './constants';
 
@@ -11,12 +11,12 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
+
 export const generateToken = (user: { id: string; email: string; role: string }): string => {
-  return jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
-    AUTH.JWT_SECRET,
-    { expiresIn: AUTH.TOKEN_EXPIRY }
-  );
+    const payload: JwtPayload = { id: user.id, email: user.email, role: user.role };
+  const options: SignOptions = { expiresIn: AUTH.TOKEN_EXPIRY as SignOptions['expiresIn'] }; // cast to string
+  
+  return jwt.sign(payload, AUTH.JWT_SECRET, options);
 };
 
 export const verifyToken = (token: string): any => {

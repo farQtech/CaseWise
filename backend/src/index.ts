@@ -63,7 +63,7 @@ app.get('/health', (req: Request, res: Response) => {
   res.json({
     status: STATUS.OK,
     timestamp: new Date().toISOString(),
-    service: 'health-app-backend',
+    service: 'case-wise-backend',
     version: VERSION
   });
 });

@@ -29,7 +29,7 @@ export const createNotesRoutes = (notesModel: NoteModel, userModel: UserModel): 
     try {
       const { caseNoteId } = req.params;
       const db = await initDatabase();
-      const caseNoteModel = new CaseNoteModel(db);
+      const caseNoteModel = new NoteModel(db);
 
       const caseNote = await caseNoteModel.findById(caseNoteId);
 
@@ -57,6 +57,7 @@ export const createNotesRoutes = (notesModel: NoteModel, userModel: UserModel): 
 
       const doctor = req.user?.email || req.body?.doctor || 'Not Found'; 
 
+      const now = new Date().toISOString();
       const newCaseNote: Omit<CaseNote, 'id'> = {
         patientId: patientId,
         date,
@@ -66,7 +67,9 @@ export const createNotesRoutes = (notesModel: NoteModel, userModel: UserModel): 
         prescription,
         notes,
         attachments: attachments || [],
-        status
+        status,
+        createdAt: now,
+        updatedAt: now
       };
 
       const savedNote = await notesModel.create(newCaseNote);

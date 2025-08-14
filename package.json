@@ -1,5 +1,5 @@
 {
-  "name": "health-app-monorepo",
+  "name": "case-wise-monorepo",
   "version": "1.0.0",
   "description": "Health App Monorepo with Backend, Worker, and Frontend",
   "private": true,
