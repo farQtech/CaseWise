@@ -9,10 +9,7 @@ import {
   Activity, 
   User, 
   LogOut, 
-  Settings,
-  FileText,
   Users,
-  Plus,
   Home
 } from 'lucide-react';
 
@@ -39,10 +36,6 @@ const Navigation: React.FC = () => {
   const handleLogout = async () => {
     await logout();
     navigate('/');
-  };
-
-  const handleAddNewPatient = () => {
-    navigate('/add-patient');
   };
 
   const handleBackToPatients = () => {

@@ -8,10 +8,8 @@ import {
   Upload, 
   Save,
   X,
-  AlertCircle,
   Stethoscope,
   Pill,
-  Activity
 } from 'lucide-react';
 import FileUpload from './FileUpload';
 import axios from 'axios';
@@ -48,7 +46,6 @@ interface CaseNotesProps {
 const CaseNotes: React.FC<CaseNotesProps> = ({ patient, onBack }) => {
   const [caseNotes, setCaseNotes] = useState<CaseNote[]>([]);
   const [showNewCase, setShowNewCase] = useState(false);
-  const [selectedCase, setSelectedCase] = useState<CaseNote | null>(null);
   const [newCase, setNewCase] = useState({
     diagnosis: '',
     prescription: '',
@@ -128,7 +125,6 @@ const CaseNotes: React.FC<CaseNotesProps> = ({ patient, onBack }) => {
   setShowNewCase(false);
   setShowFileUpload(false);
   setUploadComplete(false);
-  setSelectedCase(null);
   }
 
   const getStatusColor = (status: string) => {

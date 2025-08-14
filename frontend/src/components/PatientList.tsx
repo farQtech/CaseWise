@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   User, 
   Calendar, 
   FileText, 
-  Plus, 
   Search, 
   Filter,
   Clock,
@@ -30,7 +29,7 @@ interface PatientListProps {
 }
 
 const PatientList: React.FC<PatientListProps> = ({ onSelectPatient, onAddNewPatient }) => {
-  const [patients, setPatients] = useState<Patient[]>([
+  const [patients] = useState<Patient[]>([
     {
       id: '1',
       nhsNumber: '1234567890',

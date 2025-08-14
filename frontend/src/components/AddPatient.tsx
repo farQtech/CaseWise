@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { 
   User, 
-  Calendar, 
   Phone, 
-  MapPin, 
   Save, 
   X, 
   AlertCircle,
   Shield,
-  Mail
 } from 'lucide-react';
 
 interface AddPatientProps {

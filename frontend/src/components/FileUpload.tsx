@@ -111,7 +111,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ patientId, onUploadComplete }) 
   return (
     <div className="space-y-4">
       {/* File Upload Area */}
-        {uploadedFiles.length == 0 && (
+        {uploadedFiles.length === 0 && (
       <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary-400 transition-colors">
         <input
           ref={fileInputRef}
