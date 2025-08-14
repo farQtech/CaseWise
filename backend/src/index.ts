@@ -12,17 +12,18 @@ import { createFileRoutes } from './routes/files';
 import { authMiddleware, requireRole, AuthenticatedRequest } from './middleware/auth';
 import { NoteModel } from './models/Note';
 import { createNotesRoutes } from './routes/notes';
+import { ENV, LOG, STATUS, VERSION, HEALTH_MSG, METHODS, HEADERS } from './constants';
 
 dotenv.config();
 
 // Debug environment variables
-console.log('🔧 Backend environment variables:');
-console.log('  - NODE_ENV:', process.env.NODE_ENV);
-console.log('  - PORT:', process.env.PORT);
-console.log('  - WORKER_API_KEY:', process.env.WORKER_API_KEY);
+console.log(LOG.BACKEND_ENV);
+console.log('  - NODE_ENV:', ENV.NODE_ENV);
+console.log('  - PORT:', ENV.PORT);
+console.log('  - WORKER_API_KEY:', ENV.WORKER_API_KEY);
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = ENV.PORT;
 
 // Initialize database and models
 let userModel: UserModel | null = null;
@@ -36,11 +37,10 @@ const initializeApp = async () => {
     fileModel = new FileModel(db);
     noteModel = new NoteModel(db);
     
-    // Note: Admin user seeding is now handled by the worker service
-    console.log('✅ Database and models initialized');
-    console.log('🌱 Admin user seeding handled by worker service');
+    console.log(LOG.DB_INIT_SUCCESS);
+    console.log(LOG.WORKER_SEED_INFO);
   } catch (error) {
-    console.error('❌ Failed to initialize database:', error);
+    console.error(LOG.ERROR_INIT_DB, error);
     process.exit(1);
   }
 };
@@ -48,63 +48,50 @@ const initializeApp = async () => {
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: ENV.FRONTEND_URL,
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
+  methods: METHODS,
+  allowedHeaders: HEADERS
 }));
 app.use(morgan('combined'));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health check endpoint (public)
+// Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
   res.json({
-    status: 'OK',
+    status: STATUS.OK,
     timestamp: new Date().toISOString(),
     service: 'health-app-backend',
-    version: '1.0.0'
+    version: VERSION
   });
 });
 
-// Authentication routes (public)
+// Authentication routes
 app.use('/api/auth', (req, res, next) => {
-  if (!userModel) {
-    return res.status(503).json({ error: 'Service not ready' });
-  }
+  if (!userModel) return res.status(503).json({ error: STATUS.SERVICE_NOT_READY });
   const authRouter = createAuthRoutes(userModel);
   authRouter(req, res, next);
 });
 
 // File routes
 app.use('/api/files', (req, res, next) => {
-  if (!fileModel || !userModel) {
-    return res.status(503).json({ error: 'Service not ready' });
-  }
-  
-  
+  if (!fileModel || !userModel) return res.status(503).json({ error: STATUS.SERVICE_NOT_READY });
   const fileRouter = createFileRoutes(fileModel, userModel);
   fileRouter(req, res, next);
 });
 
 // Note routes
 app.use('/api/notes', (req, res, next) => {
-  if (!noteModel || !userModel) {
-    return res.status(503).json({ error: 'Service not ready' });
-  }
-  
-  
-  const fileRouter = createNotesRoutes(noteModel, userModel);
-  fileRouter(req, res, next);
+  if (!noteModel || !userModel) return res.status(503).json({ error: STATUS.SERVICE_NOT_READY });
+  const noteRouter = createNotesRoutes(noteModel, userModel);
+  noteRouter(req, res, next);
 });
 
-
-// Protected API routes (everything else under /api)
+// Protected API routes
 app.use('/api', (req, res, next) => {
-  if (!userModel) {
-    return res.status(503).json({ error: 'Service not ready' });
-  }
+  if (!userModel) return res.status(503).json({ error: STATUS.SERVICE_NOT_READY });
   const auth = authMiddleware(userModel);
   auth(req, res, next);
 });
@@ -112,54 +99,22 @@ app.use('/api', (req, res, next) => {
 // Protected status endpoint
 app.get('/api/status', (req: AuthenticatedRequest, res: Response) => {
   res.json({
-    message: 'Health App Backend is running',
-    version: '1.0.0',
+    message: HEALTH_MSG.BACKEND_RUNNING,
+    version: VERSION,
     user: req.user
   });
 });
 
-// Admin-only endpoint example
-app.get('/api/admin/users', 
-  requireRole(['admin']), 
-  async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      // This would typically fetch all users from the database
-      res.json({
-        message: 'Admin endpoint accessed successfully',
-        user: req.user,
-        data: 'Protected admin data would be here'
-      });
-    } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  }
-);
-
-// Protected health metrics endpoint
-app.get('/api/health-metrics', (req: AuthenticatedRequest, res: Response) => {
-  res.json({
-    message: 'Health metrics endpoint',
-    user: req.user,
-    metrics: {
-      heartRate: 72,
-      bloodPressure: '120/80',
-      temperature: 98.6,
-      oxygenSaturation: 98,
-      stepsToday: 8432,
-      sleepQuality: 85
-    }
-  });
-});
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
+  res.status(500).json({ error: STATUS.ERROR_GENERIC });
 });
 
 // 404 handler
 app.use('*', (req: Request, res: Response) => {
-  res.status(404).json({ error: 'Route not found' });
+  res.status(404).json({ error: STATUS.ROUTE_NOT_FOUND });
 });
 
 // Start server
@@ -167,12 +122,12 @@ const startServer = async () => {
   await initializeApp();
   
   app.listen(PORT, () => {
-    console.log(`🚀 Health App Backend server running on port ${PORT}`);
-    console.log(`📊 Health check: http://localhost:${PORT}/health`);
-    console.log(`🔐 Auth endpoints: http://localhost:${PORT}/api/auth`);
-    console.log(`🔗 API status: http://localhost:${PORT}/api/status`);
-    console.log(`👤 Admin credentials: admin@casewise.com / admin`);
-    console.log(`🌱 Seeding handled by worker service`);
+    console.log(`${LOG.SERVER_START} ${PORT}`);
+    console.log(`${LOG.HEALTH_CHECK_URL} http://localhost:${PORT}/health`);
+    console.log(`${LOG.AUTH_URL} http://localhost:${PORT}/api/auth`);
+    console.log(`${LOG.API_STATUS_URL} http://localhost:${PORT}/api/status`);
+    console.log(LOG.ADMIN_CREDS);
+    console.log(LOG.SEED_WORKER_INFO);
   });
 };
 

@@ -1,6 +1,7 @@
 import sqlite3 from 'sqlite3';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+import { USER_TABLE, USER_ROLE, ADMIN_USER, USER_LOG } from './constants';
 
 export interface User {
   id: string;
@@ -27,19 +28,19 @@ export class UserModel {
   async createUser(userData: CreateUserData): Promise<User> {
     const id = uuidv4();
     const passwordHash = await bcrypt.hash(userData.password, 12);
-    const role = userData.role || 'user';
+    const role = userData.role || USER_ROLE.USER;
 
     return new Promise((resolve, reject) => {
       this.db.run(
-        'INSERT INTO users (id, email, password_hash, role) VALUES (?, ?, ?, ?)',
+        USER_TABLE.INSERT,
         [id, userData.email, passwordHash, role],
-        function(err) {
+        function (err) {
           if (err) {
             reject(err);
             return;
           }
-          
-          this.get('SELECT * FROM users WHERE id = ?', [id], (err: any, row: any) => {
+
+          this.get(USER_TABLE.SELECT_BY_ID, [id], (err: any, row: any) => {
             if (err) {
               reject(err);
               return;
@@ -53,33 +54,19 @@ export class UserModel {
 
   async findByEmail(email: string): Promise<User | null> {
     return new Promise((resolve, reject) => {
-      this.db.get(
-        'SELECT * FROM users WHERE email = ?',
-        [email],
-        (err: any, row: any) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve(row as User || null);
-        }
-      );
+      this.db.get(USER_TABLE.SELECT_BY_EMAIL, [email], (err: any, row: any) => {
+        if (err) return reject(err);
+        resolve(row as User || null);
+      });
     });
   }
 
   async findById(id: string): Promise<User | null> {
     return new Promise((resolve, reject) => {
-      this.db.get(
-        'SELECT * FROM users WHERE id = ?',
-        [id],
-        (err: any, row: any) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve(row as User || null);
-        }
-      );
+      this.db.get(USER_TABLE.SELECT_BY_ID, [id], (err: any, row: any) => {
+        if (err) return reject(err);
+        resolve(row as User || null);
+      });
     });
   }
 
@@ -88,25 +75,21 @@ export class UserModel {
   }
 
   async seedAdminUser(): Promise<void> {
-    const adminEmail = 'admin@casewise.com';
-    const adminPassword = 'admin';
-    
-    // Check if admin user already exists
-    const existingUser = await this.findByEmail(adminEmail);
+    const existingUser = await this.findByEmail(ADMIN_USER.EMAIL);
     if (existingUser) {
-      console.log('Admin user already exists');
+      console.log(USER_LOG.ADMIN_EXISTS);
       return;
     }
 
     try {
       await this.createUser({
-        email: adminEmail,
-        password: adminPassword,
-        role: 'admin'
+        email: ADMIN_USER.EMAIL,
+        password: ADMIN_USER.PASSWORD,
+        role: USER_ROLE.ADMIN
       });
-      console.log('Admin user seeded successfully');
+      console.log(USER_LOG.ADMIN_SEEDED);
     } catch (error) {
-      console.error('Error seeding admin user:', error);
+      console.error(USER_LOG.ERROR_SEED_ADMIN, error);
     }
   }
 }

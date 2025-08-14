@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { UserModel } from '../models/User';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+import { AUTH } from './constants';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -14,19 +13,15 @@ export interface AuthenticatedRequest extends Request {
 
 export const generateToken = (user: { id: string; email: string; role: string }): string => {
   return jwt.sign(
-    { 
-      id: user.id, 
-      email: user.email, 
-      role: user.role 
-    },
-    JWT_SECRET,
-    { expiresIn: '24h' }
+    { id: user.id, email: user.email, role: user.role },
+    AUTH.JWT_SECRET,
+    { expiresIn: AUTH.TOKEN_EXPIRY }
   );
 };
 
 export const verifyToken = (token: string): any => {
   try {
-    return jwt.verify(token, JWT_SECRET);
+    return jwt.verify(token, AUTH.JWT_SECRET);
   } catch (error) {
     return null;
   }
@@ -35,73 +30,37 @@ export const verifyToken = (token: string): any => {
 export const authMiddleware = (userModel: UserModel) => {
   return async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // for worker
-       const apiKey = req.headers['x-api-key'];
-    if (apiKey === process.env.WORKER_API_KEY) return next();
+      // Worker API key check
+      const apiKey = req.headers[AUTH.HEADER_API_KEY];
+      if (apiKey === process.env.WORKER_API_KEY) return next();
 
-      // Check for token in Authorization header first, then cookies
+      // Token from header or cookie
       let token: string | undefined;
-      
       const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        token = authHeader.substring(7);
-      } else if (req.cookies && req.cookies.token) {
-        token = req.cookies.token;
-      }
-      
-      if (!token) {
-        return res.status(401).json({ 
-          error: 'Access denied. No token provided.' 
-        });
-      }
+      if (authHeader && authHeader.startsWith('Bearer ')) token = authHeader.substring(7);
+      else if (req.cookies?.token) token = req.cookies.token;
+
+      if (!token) return res.status(401).json({ error: AUTH.ERROR_NO_TOKEN });
 
       const decoded = verifyToken(token);
+      if (!decoded) return res.status(401).json({ error: AUTH.ERROR_INVALID_TOKEN });
 
-      if (!decoded) {
-        return res.status(401).json({ 
-          error: 'Invalid token.' 
-        });
-      }
-
-      // Verify user still exists in database
       const user = await userModel.findById(decoded.id);
-      if (!user) {
-        return res.status(401).json({ 
-          error: 'User not found.' 
-        });
-      }
+      if (!user) return res.status(401).json({ error: AUTH.ERROR_USER_NOT_FOUND });
 
-      // Add user info to request
-      req.user = {
-        id: user.id,
-        email: user.email,
-        role: user.role
-      };
-
+      req.user = { id: user.id, email: user.email, role: user.role };
       next();
     } catch (error) {
       console.error('Auth middleware error:', error);
-      res.status(500).json({ 
-        error: 'Internal server error during authentication.' 
-      });
+      res.status(500).json({ error: AUTH.ERROR_INTERNAL });
     }
   };
 };
 
 export const requireRole = (roles: string[]) => {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    if (!req.user) {
-      return res.status(401).json({ 
-        error: 'Authentication required.' 
-      });
-    }
-
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ 
-        error: 'Insufficient permissions.' 
-      });
-    }
-
+    if (!req.user) return res.status(401).json({ error: AUTH.ERROR_AUTH_REQUIRED });
+    if (!roles.includes(req.user.role)) return res.status(403).json({ error: AUTH.ERROR_INSUFFICIENT_PERMISSIONS });
     next();
   };
 };

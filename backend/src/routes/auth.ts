@@ -49,7 +49,7 @@ export const createAuthRoutes = (userModel: UserModel): Router => {
         path: '/'
       });
 
-      // Return success response (without token in body for security)
+      // Return success response - without token in body
       res.json({
         message: 'Login successful',
         user: {

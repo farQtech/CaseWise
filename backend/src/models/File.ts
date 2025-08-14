@@ -1,4 +1,5 @@
 import { Database } from 'sqlite3';
+import { FILE_TABLE, FILE_STATUS, FILE_LOG } from './constants';
 
 export interface FileRecord {
   id: string;
@@ -9,8 +10,8 @@ export interface FileRecord {
   fileType: string;
   mimeType: string;
   size: number;
-  status: 'uploaded' | 'processing' | 'processed' | 'error';
-  metadata?: string; // JSON string for additional data
+  status: keyof typeof FILE_STATUS;
+  metadata?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -24,29 +25,11 @@ export class FileModel {
   }
 
   private initTable(): void {
-    const sql = `
-      CREATE TABLE IF NOT EXISTS files (
-        id TEXT PRIMARY KEY,
-        patientId TEXT NOT NULL,
-        originalName TEXT NOT NULL,
-        fileName TEXT NOT NULL,
-        filePath TEXT NOT NULL,
-        fileType TEXT NOT NULL,
-        mimeType TEXT NOT NULL,
-        size INTEGER NOT NULL,
-        status TEXT NOT NULL DEFAULT 'uploaded',
-        metadata TEXT,
-        createdAt TEXT NOT NULL,
-        updatedAt TEXT NOT NULL,
-        FOREIGN KEY (patientId) REFERENCES patients (id) ON DELETE CASCADE
-      )
-    `;
-    
-    this.db.run(sql, (err) => {
+    this.db.run(FILE_TABLE.CREATE_SQL, (err) => {
       if (err) {
-        console.error('Error creating files table:', err);
+        console.error(FILE_LOG.ERROR_CREATE_TABLE, err);
       } else {
-        console.log('Files table ready');
+        console.log(FILE_LOG.TABLE_READY);
       }
     });
   }
@@ -55,12 +38,6 @@ export class FileModel {
     return new Promise((resolve, reject) => {
       const id = this.generateId();
       const now = new Date().toISOString();
-      
-      const sql = `
-        INSERT INTO files (id, patientId, originalName, fileName, filePath, fileType, mimeType, size, status, metadata, createdAt, updatedAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
-      
       const params = [
         id,
         fileData.patientId,
@@ -76,107 +53,64 @@ export class FileModel {
         now
       ];
 
-      this.db.run(sql, params, function(err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve({
-            id,
-            ...fileData,
-            createdAt: now,
-            updatedAt: now
-          });
-        }
+      this.db.run(FILE_TABLE.INSERT_SQL, params, function(err) {
+        if (err) reject(err);
+        else resolve({ id, ...fileData, createdAt: now, updatedAt: now });
       });
     });
   }
 
   async findById(id: string): Promise<FileRecord | null> {
     return new Promise((resolve, reject) => {
-      const sql = 'SELECT * FROM files WHERE id = ?';
-      
-      this.db.get(sql, [id], (err, row) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(row || null);
-        }
+      this.db.get(FILE_TABLE.SELECT_BY_ID, [id], (err, row) => {
+        if (err) reject(err);
+        else resolve(row || null);
       });
     });
   }
 
   async findByPatientId(patientId: string): Promise<FileRecord[]> {
     return new Promise((resolve, reject) => {
-      const sql = 'SELECT * FROM files WHERE patientId = ? ORDER BY createdAt DESC';
-      
-      this.db.all(sql, [patientId], (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows || []);
-        }
+      this.db.all(FILE_TABLE.SELECT_BY_PATIENT, [patientId], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows || []);
       });
     });
   }
 
   async findByStatus(status: FileRecord['status']): Promise<FileRecord[]> {
     return new Promise((resolve, reject) => {
-      const sql = 'SELECT * FROM files WHERE status = ? ORDER BY createdAt ASC';
-      
-      this.db.all(sql, [status], (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows || []);
-        }
+      this.db.all(FILE_TABLE.SELECT_BY_STATUS, [status], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows || []);
       });
     });
   }
 
   async updateStatus(id: string, status: FileRecord['status'], metadata?: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      const sql = `
-        UPDATE files 
-        SET status = ?, metadata = ?, updatedAt = ? 
-        WHERE id = ?
-      `;
-      
       const params = [status, metadata || null, new Date().toISOString(), id];
-
-      this.db.run(sql, params, function(err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
+      this.db.run(FILE_TABLE.UPDATE_STATUS, params, function(err) {
+        if (err) reject(err);
+        else resolve();
       });
     });
   }
 
   async delete(id: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      const sql = 'DELETE FROM files WHERE id = ?';
-      
-      this.db.run(sql, [id], function(err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
+      this.db.run(FILE_TABLE.DELETE_BY_ID, [id], function(err) {
+        if (err) reject(err);
+        else resolve();
       });
     });
   }
 
   async deleteByPatientId(patientId: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      const sql = 'DELETE FROM files WHERE patientId = ?';
-      
-      this.db.run(sql, [patientId], function(err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
+      this.db.run(FILE_TABLE.DELETE_BY_PATIENT, [patientId], function(err) {
+        if (err) reject(err);
+        else resolve();
       });
     });
   }
@@ -186,16 +120,12 @@ export class FileModel {
   }
 
   async notifyWorker(files: FileRecord[]): Promise<void> {
-    const workerUrl = process.env.WORKER_URL || 'http://localhost:3002';
-    
     try {
-      // This would be a POST request to the worker to notify about new files
-      // For now, we'll just log it since the worker polls for files
-      console.log(`📤 Notifying worker about ${files.length} new files:`, 
+      console.log(`${FILE_LOG.NOTIFY_WORKER} ${files.length} new files:`, 
         files.map(f => ({ id: f.id, originalName: f.originalName }))
       );
     } catch (error) {
-      console.error('Failed to notify worker:', error);
+      console.error(FILE_LOG.FAILED_NOTIFY_WORKER, error);
     }
   }
 }

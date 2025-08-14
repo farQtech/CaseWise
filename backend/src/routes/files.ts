@@ -6,7 +6,10 @@ import { FileModel } from '../models/File';
 import { authMiddleware, AuthenticatedRequest } from '../middleware/auth';
 import { UserModel } from '../models/User';
 
-// Function to generate 8-digit alphanumeric string
+/**
+ * Function to generate 8-digit alphanumeric string
+ * @returns 8-digit alphanumeric string
+ */
 function generateSecureFileName(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let result = '';
@@ -34,6 +37,12 @@ const storage = multer.diskStorage({
   }
 });
 
+/**
+ * Basic mimetype filter
+ * @param req 
+ * @param file 
+ * @param cb 
+ */
 const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   // Allow only images and PDFs
   const allowedMimes = [
@@ -59,6 +68,12 @@ const upload = multer({
   }
 });
 
+/**
+ * factory method
+ * @param fileModel 
+ * @param userModel 
+ * @returns 
+ */
 export const createFileRoutes = (fileModel: FileModel, userModel: UserModel): Router => {
   const router = Router();
   
@@ -77,7 +92,6 @@ export const createFileRoutes = (fileModel: FileModel, userModel: UserModel): Ro
       console.log('👤 User:', req.user);
       console.log('📁 Files received:', req.files?.length || 0);
   
-      // 🔍 Step 1: Check if Multer saved them to disk
       const files = req.files as Express.Multer.File[];
   
       for (const file of files) {
@@ -88,10 +102,6 @@ export const createFileRoutes = (fileModel: FileModel, userModel: UserModel): Ro
         console.log('Exists on disk?', fs.existsSync(file.path));
         console.log('-------------------');
       }
-  
-      // ⛔ Step 2: If nothing exists on disk here,
-      //           the problem is in Multer config or request payload
-      //           → The rest of your logic won’t help until that’s fixed.
   
       try {
         const { patientId } = req.params;
@@ -111,7 +121,7 @@ export const createFileRoutes = (fileModel: FileModel, userModel: UserModel): Ro
             fileType: path.extname(file.originalname).toLowerCase(),
             mimeType: file.mimetype,
             size: file.size,
-            status: 'uploaded',
+            status: 'UPLOADED',
             metadata: JSON.stringify({
               uploadedBy: req.user?.id || 'system',
               uploadedAt: new Date().toISOString()
@@ -193,7 +203,7 @@ export const createFileRoutes = (fileModel: FileModel, userModel: UserModel): Ro
         return res.status(401).json({ error: 'Unauthorized' });
       }
       try {
-        const files = await fileModel.findByStatus('uploaded');
+        const files = await fileModel.findByStatus('UPLOADED');
         
         res.json({
           files: files.map(file => ({

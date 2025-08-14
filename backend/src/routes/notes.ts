@@ -55,7 +55,7 @@ export const createNotesRoutes = (notesModel: NoteModel, userModel: UserModel): 
         return res.status(400).json({ error: 'Missing required fields' });
       }
 
-      const doctor = req.user?.email || 'Unknown Doctor'; 
+      const doctor = req.user?.email || req.body?.doctor || 'Not Found'; 
 
       const newCaseNote: Omit<CaseNote, 'id'> = {
         patientId: patientId,

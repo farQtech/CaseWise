@@ -111,13 +111,13 @@ const PatientList: React.FC<PatientListProps> = ({ onSelectPatient, onAddNewPati
           <h2 className="text-2xl font-bold text-gray-900">Patient Registry</h2>
           <p className="text-gray-600">Patient Management System</p>
         </div>
-        <button
+        {/* <button
           onClick={onAddNewPatient}
           className="btn-primary flex items-center space-x-2"
         >
           <Plus className="w-5 h-5" />
           <span>Add New Patient</span>
-        </button>
+        </button> */}
       </div>
 
       {/* Search and Filter */}
