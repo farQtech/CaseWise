@@ -2,7 +2,8 @@ export const ENV = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: process.env.PORT || 3001,
   FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
-  WORKER_API_KEY: process.env.WORKER_API_KEY || 'worker-secret-key'
+  WORKER_API_KEY: process.env.WORKER_API_KEY || 'worker-secret-key',
+  RAILWAY_STATIC_URL: process.env.RAILWAY_STATIC_URL || null
 };
 
 export const LOG = {
@@ -15,7 +16,10 @@ export const LOG = {
   API_STATUS_URL: '🔗 API status:',
   ADMIN_CREDS: '👤 Admin credentials: admin@casewise.com / admin',
   SEED_WORKER_INFO: '🌱 Seeding handled by worker service',
-  ERROR_INIT_DB: '❌ Failed to initialize database:'
+  ERROR_INIT_DB: '❌ Failed to initialize database:',
+  CLEANUP_START: '🧹 Starting system cleanup...',
+  CLEANUP_SUCCESS: '✅ System cleanup completed successfully',
+  CLEANUP_FAILED: '❌ System cleanup failed:'
 };
 
 export const STATUS = {

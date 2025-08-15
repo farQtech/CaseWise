@@ -4,6 +4,8 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+import fs from 'fs';
+import path from 'path';
 import { initDatabase } from './database/schema';
 import { UserModel } from './models/User';
 import { FileModel } from './models/File';
@@ -45,13 +47,57 @@ const initializeApp = async () => {
   }
 };
 
+// Cleanup function
+const cleanupSystem = async () => {
+  try {
+    console.log(LOG.CLEANUP_START);
+    
+    // Clean APP_DATA/uploads directory
+    const uploadsPath = path.join(process.cwd(), '../APP_DATA', 'uploads');
+    if (fs.existsSync(uploadsPath)) {
+      const files = fs.readdirSync(uploadsPath);
+      for (const file of files) {
+        const filePath = path.join(uploadsPath, file);
+        if (fs.statSync(filePath).isFile()) {
+          fs.unlinkSync(filePath);
+          console.log(`🗑️ Deleted file: ${file}`);
+        }
+      }
+      console.log(`✅ Cleaned ${files.length} files from uploads directory`);
+    } else {
+      console.log('📁 Uploads directory does not exist, creating it');
+      fs.mkdirSync(uploadsPath, { recursive: true });
+    }
+
+    // Clean notes from database (if models are available)
+    if (noteModel) {
+      const deletedNotes = await noteModel.deleteAll();
+      console.log(`🗑️ Deleted ${deletedNotes} notes from database`);
+    }
+
+    // Clean files from database (if models are available)
+    if (fileModel) {
+      const deletedFiles = await fileModel.deleteAll();
+      console.log(`🗑️ Deleted ${deletedFiles} file records from database`);
+    }
+
+    console.log(LOG.CLEANUP_SUCCESS);
+    return { success: true, message: 'System cleanup completed' };
+  } catch (error) {
+    console.error(LOG.CLEANUP_FAILED, error);
+    throw error;
+  }
+};
+
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: ENV.FRONTEND_URL,
+  origin: ENV.NODE_ENV === 'production' 
+    ? [ENV.FRONTEND_URL, ENV.RAILWAY_STATIC_URL].filter((url): url is string => url !== null)
+    : ENV.FRONTEND_URL,
   credentials: true,
   methods: METHODS,
-  allowedHeaders: HEADERS
+  allowedHeaders: [...HEADERS, 'x-api-key']
 }));
 app.use(morgan('combined'));
 app.use(cookieParser());
@@ -66,6 +112,28 @@ app.get('/health', (req: Request, res: Response) => {
     service: 'case-wise-backend',
     version: VERSION
   });
+});
+
+// Cleanup endpoint (open, no authentication required)
+app.post('/api/cleanup', async (req: Request, res: Response) => {
+  try {
+    // Simple API key check for worker
+    const apiKey = req.headers['x-api-key'] || req.headers['X-API-Key'] || req.headers['X-Api-Key'];
+    
+    if (!apiKey || apiKey !== ENV.WORKER_API_KEY) {
+      console.log('❌ Cleanup endpoint: API key mismatch or missing');
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const result = await cleanupSystem();
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Cleanup endpoint error:', error);
+    res.status(500).json({ 
+      error: 'Cleanup failed', 
+      message: error instanceof Error ? error.message : 'Unknown error' 
+    });
+  }
 });
 
 // Authentication routes

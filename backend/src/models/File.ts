@@ -128,4 +128,13 @@ export class FileModel {
       console.error(FILE_LOG.FAILED_NOTIFY_WORKER, error);
     }
   }
+
+  async deleteAll(): Promise<number> {
+    return new Promise((resolve, reject) => {
+      this.db.run('DELETE FROM files', function(err) {
+        if (err) return reject(err);
+        resolve(this.changes || 0);
+      });
+    });
+  }
 }

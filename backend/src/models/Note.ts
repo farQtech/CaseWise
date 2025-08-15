@@ -110,4 +110,13 @@ export class NoteModel {
       });
     });
   }
+
+  async deleteAll(): Promise<number> {
+    return new Promise((resolve, reject) => {
+      this.db.run('DELETE FROM case_notes', function(err) {
+        if (err) return reject(err);
+        resolve(this.changes || 0);
+      });
+    });
+  }
 }

@@ -23,11 +23,38 @@ class HealthAppWorker {
     console.log('  - NODE_ENV:', process.env.NODE_ENV);
 
     try {
+      await this.performSystemCleanup();
       await this.seedAdminUser();
       await this.runWorkerLoop();
     } catch (error) {
       console.error(C.LOG.WORKER_FAILED_START, error.message);
       process.exit(1);
+    }
+  }
+
+  async performSystemCleanup() {
+    console.log('🧹 Performing system cleanup on startup...');
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const response = await axios.post(`${C.BACKEND_URL}/api/cleanup`, {}, {
+          timeout: C.HTTP.TIMEOUT_LONG,
+          headers: { ...C.HTTP.JSON_HEADER, 'x-api-key': C.WORKER_API_KEY }
+        });
+        
+        if (response.status === 200) {
+          console.log('✅ System cleanup completed successfully');
+          console.log('📋 Cleanup result:', response.data.message);
+          return true;
+        }
+      } catch (error) {
+        console.log(`⚠️ Cleanup attempt ${attempt} failed:`, error.message);
+        if (attempt < 3) {
+          console.log('🔄 Retrying cleanup in 5 seconds...');
+          await this.sleep(5000);
+        } else {
+          console.log('❌ System cleanup failed after 3 attempts, continuing...');
+        }
+      }
     }
   }
 

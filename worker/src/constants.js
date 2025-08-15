@@ -1,7 +1,16 @@
 const path = require('path');
 
+// Determine backend URL based on environment
+const getBackendUrl = () => {
+  if (process.env.NODE_ENV === 'production') {
+    // For Railway, services communicate via localhost
+    return process.env.BACKEND_URL || 'http://localhost:8080';
+  }
+  return process.env.BACKEND_URL || 'http://localhost:3001';
+};
+
 module.exports = {
-  BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:3001',
+  BACKEND_URL: getBackendUrl(),
   WORKER_API_KEY: process.env.WORKER_API_KEY || 'worker-secret-key',
   SEED_RETRY_ATTEMPTS: 5,
   SEED_RETRY_DELAY: 2000,
