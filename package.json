@@ -15,6 +15,10 @@
     "dev:worker": "turbo run dev --filter=worker",
     "dev:frontend": "turbo run dev --filter=frontend",
     "start": "turbo run start",
+    "start:backend": "turbo run start --filter=backend",
+    "start:worker": "turbo run start --filter=worker",
+    "start:frontend": "turbo run start --filter=frontend",
+    "start:all": "concurrently \"npm run start:backend\" \"npm run start:worker\" \"npm run start:frontend\"",
     "test": "turbo run test",
     "lint": "turbo run lint",
     "clean": "turbo run clean",
@@ -31,7 +35,8 @@
   "devDependencies": {
     "turbo": "^1.12.4",
     "typescript": "^5.3.3",
-    "@types/node": "^20.10.5"
+    "@types/node": "^20.10.5",
+    "concurrently": "^8.2.2"
   },
   "engines": {
     "node": ">=18.0.0",
