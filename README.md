@@ -1,7 +1,7 @@
 
 # CaseWise Patient Management System
 
-[![Build Status](https://github.com/farQtech/CaseWise/actions/workflows/ci.yml/badge.svg)](https://github.com/farQtech/CaseWise/actions/runs/16965895220)
+[![Node.js CI](https://github.com/farQtech/CaseWise/actions/workflows/node.js.yml/badge.svg)](https://github.com/farQtech/CaseWise/actions/workflows/node.js.yml)
 
 A comprehensive **Patient Case Notes System** built with a modern **Turbo** monorepo architecture, **TypeScript**, and **Secure JWT Authentication with Cookies**. Designed to meet NHS UK standards with a prescription pad-style interface.
 
