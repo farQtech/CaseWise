@@ -13,6 +13,7 @@ import { authMiddleware, requireRole, AuthenticatedRequest } from './middleware/
 import { NoteModel } from './models/Note';
 import { createNotesRoutes } from './routes/notes';
 import { ENV, LOG, STATUS, VERSION, HEALTH_MSG, METHODS, HEADERS } from './constants';
+import path from 'path';
 
 dotenv.config();
 
@@ -112,9 +113,10 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   res.status(500).json({ error: STATUS.ERROR_GENERIC });
 });
 
-// 404 handler
-app.use('*', (req: Request, res: Response) => {
-  res.status(404).json({ error: STATUS.ROUTE_NOT_FOUND });
+// static server frontend
+app.use(express.static(path.join(__dirname, '../frontend/build')));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 });
 
 // Start server
