@@ -44,9 +44,10 @@ export const createAuthRoutes = (userModel: UserModel): Router => {
       res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-        // sameSite: 'strict',
+        sameSite: process.env.SAME_SITE as ('strict' | 'none') || 'strict',
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
-        path: '/'
+        path: '/',
+        domain: process.env.COOKIE_DOMAIN,
       });
 
       // Return success response - without token in body
