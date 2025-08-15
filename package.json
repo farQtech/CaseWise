@@ -16,6 +16,7 @@
     "dev:frontend": "turbo run dev --filter=frontend",
     "start": "turbo run start",
     "start:railway": "npm run start:backend & sleep 10 && npm run start:worker & sleep 5 && npm run start:frontend",
+    "start:railway-backend": "npm run start:backend",
     "start:backend": "turbo run start --filter=backend",
     "start:worker": "turbo run start --filter=worker",
     "start:frontend": "turbo run start --filter=frontend",
@@ -43,5 +44,8 @@
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
   },
-  "packageManager": "npm@8.0.0"
+  "packageManager": "npm@8.0.0",
+  "overrides": {
+    "typescript": "^5.3.3"
+  }
 }

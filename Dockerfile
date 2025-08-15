@@ -7,16 +7,16 @@ WORKDIR /app
 COPY package*.json ./
 COPY turbo.json ./
 
-# Install root dependencies
-RUN npm install
+# Install root dependencies with legacy peer deps to resolve conflicts
+RUN npm install --legacy-peer-deps
 
 # Copy workspace configurations
 COPY backend/package*.json ./backend/
 COPY worker/package*.json ./worker/
 COPY frontend/package*.json ./frontend/
 
-# Install all dependencies
-RUN npm install
+# Install all dependencies with legacy peer deps
+RUN npm install --legacy-peer-deps
 
 # Build stage
 FROM base AS builder
@@ -41,11 +41,11 @@ COPY --from=builder /app/frontend/build ./frontend/build
 
 # Install production dependencies for backend
 WORKDIR /app/backend
-RUN npm ci --only=production
+RUN npm ci --only=production --legacy-peer-deps
 
 # Install production dependencies for worker
 WORKDIR /app/worker
-RUN npm ci --only=production
+RUN npm ci --only=production --legacy-peer-deps
 
 # Create APP_DATA directory
 RUN mkdir -p /app/APP_DATA/uploads
